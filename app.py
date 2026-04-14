@@ -108,18 +108,26 @@ if st.session_state.logged_in:
 
     if uploaded_file is not None:
 
-        if uploaded_file.name.endswith(".csv"):
-            try:
-                df = pd.read_csv(uploaded_file)
-            except:
+        try:
+            if uploaded_file.name.endswith(".csv"):
+
+                uploaded_file.seek(0)
                 try:
-                    df = pd.read_csv(uploaded_file, sep=";")
+                    df = pd.read_csv(uploaded_file)
                 except:
-                    df = pd.read_csv(
-                        uploaded_file, sep=";", engine="python", on_bad_lines="skip"
-                    )
-        else:
-            df = pd.read_excel(uploaded_file)
+                    uploaded_file.seek(0)
+                    df = pd.read_csv(uploaded_file, sep=";")
+
+            else:
+                df = pd.read_excel(uploaded_file)
+
+            if df.empty:
+                st.error("❌ File is empty")
+                st.stop()
+
+        except Exception as e:
+            st.error("❌ Could not read file properly")
+            st.stop()
 
         st.success("Dataset uploaded successfully!")
 
