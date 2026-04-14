@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 from io import BytesIO
-from db import add_user
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -28,7 +27,6 @@ if choice == "Signup":
     new_password = st.text_input("Password", type="password")
 
     if st.button("Signup"):
-        add_user(new_user, new_password)
         auth.add_user(new_user, new_password)
         st.success("Account created successfully")
         st.info("Go to Login menu")
@@ -45,12 +43,7 @@ elif choice == "Login":
 
         if result:
             st.session_state.logged_in = True
-            # Log user login
-            with open("usage_log.txt", "a") as f:
-                f.write(f"{username} logged in\n")
             st.success("Login successful")
-            with open("usage_log.txt", "a") as f:
-                f.write(f"{username} uploaded a dataset\n")
         else:
             st.error("Invalid username or password")
 
@@ -109,26 +102,19 @@ st.sidebar.markdown(
 )
 if st.session_state.logged_in:
 
-    # Logout Button
-    if st.sidebar.button("Logout"):
-        st.session_state.logged_in = False
-        st.rerun()
-
     uploaded_file = st.file_uploader(
         "Upload your dataset (CSV or Excel format)", type=["csv", "xlsx", "xls"]
     )
 
     if uploaded_file is not None:
 
-       if uploaded_file.name.endswith(".csv"):
-           try:
-              df = pd.read_csv(uploaded_file)
-           except:
-              df = pd.read_csv(uploaded_file, on_bad_lines='skip')
-       else:
-           df = pd.read_excel(uploaded_file)
+        # Read file depending on extension
+        if uploaded_file.name.endswith(".csv"):
+            df = pd.read_csv(uploaded_file)
+        else:
+            df = pd.read_excel(uploaded_file)
 
-       st.success("Dataset uploaded successfully!")
+        st.success("Dataset uploaded successfully!")
 
         # ===============================
         # TARGET COLUMN ANALYSIS
@@ -749,27 +735,6 @@ if st.session_state.logged_in:
         score_color = (
             "green" if audit_score >= 85 else "orange" if audit_score >= 70 else "red"
         )
-
-        import plotly.graph_objects as go
-
-        fig = go.Figure(
-            go.Indicator(
-                mode="gauge+number",
-                value=audit_score,
-                title={"text": "Dataset Health Score"},
-                gauge={
-                    "axis": {"range": [0, 100]},
-                    "bar": {"color": "darkblue"},
-                    "steps": [
-                        {"range": [0, 50], "color": "#ff4d4d"},
-                        {"range": [50, 75], "color": "#ffa500"},
-                        {"range": [75, 100], "color": "#4CAF50"},
-                    ],
-                },
-            )
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
 
         st.markdown(
             f"<h1 style='text-align:center; color:{score_color};'>{audit_score} /  100</h1>",
