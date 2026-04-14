@@ -108,10 +108,16 @@ if st.session_state.logged_in:
 
     if uploaded_file is not None:
 
-        # Read file depending on extension
-        df = pd.read_csv(uploaded_file, engine="python", on_bad_lines="skip")
-        if df.empty:
-            df = pd.read_csv(uploaded_file)
+        if uploaded_file.name.endswith(".csv"):
+            try:
+                df = pd.read_csv(uploaded_file)
+            except:
+                try:
+                    df = pd.read_csv(uploaded_file, sep=";")
+                except:
+                    df = pd.read_csv(
+                        uploaded_file, sep=";", engine="python", on_bad_lines="skip"
+                    )
         else:
             df = pd.read_excel(uploaded_file)
 

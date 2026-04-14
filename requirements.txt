@@ -1,6 +1,10 @@
 streamlit
 supabase
 bcrypt
-reportlab
 pandas
 numpy
+matplotlib
+seaborn
+plotly
+reportlab
+openpyxl
