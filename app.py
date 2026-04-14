@@ -120,13 +120,15 @@ if st.session_state.logged_in:
 
     if uploaded_file is not None:
 
-        # Read file depending on extension
-        if uploaded_file.name.endswith(".csv"):
-            df = pd.read_csv(uploaded_file)
-        else:
-            df = pd.read_excel(uploaded_file)
+       if uploaded_file.name.endswith(".csv"):
+           try:
+              df = pd.read_csv(uploaded_file)
+           except:
+              df = pd.read_csv(uploaded_file, on_bad_lines='skip')
+       else:
+           df = pd.read_excel(uploaded_file)
 
-        st.success("Dataset uploaded successfully!")
+       st.success("Dataset uploaded successfully!")
 
         # ===============================
         # TARGET COLUMN ANALYSIS
